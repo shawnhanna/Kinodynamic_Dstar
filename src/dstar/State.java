@@ -99,7 +99,7 @@ public class State implements Comparable, java.io.Serializable {
 	// Override the CompareTo function for the HashMap usage
 	@Override
 	public int hashCode() {
-		return this.x + 34245 * this.y;
+		return this.x + 934245 * this.y;
 	}
 
 	@Override
@@ -115,6 +115,7 @@ public class State implements Comparable, java.io.Serializable {
 		// returns false. (See Effective Java by Joshua Bloch.)
 		if (!(aThat instanceof State))
 			return false;
+
 		// Alternative to the above line :
 		// if ( aThat == null || aThat.getClass() != this.getClass() ) return
 		// false;

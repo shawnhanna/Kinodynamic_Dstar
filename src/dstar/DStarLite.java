@@ -43,6 +43,7 @@ import javax.swing.JLabel;
  *         SOFTWARE.
  * 
  */
+@SuppressWarnings("serial")
 public class DStarLite implements java.io.Serializable {
 
 	// Private Member variables
@@ -65,7 +66,7 @@ public class DStarLite implements java.io.Serializable {
 
 	// Default constructor
 	public DStarLite() {
-		maxSteps = 1000 * 1000;
+		maxSteps = 10000000;
 		C1 = 1;
 	}
 
@@ -110,7 +111,7 @@ public class DStarLite implements java.io.Serializable {
 
 	}
 
-	/*
+	/**
 	 * CalculateKey(state u) As per [S. Koenig, 2002]
 	 */
 	private State calculateKey(State u) {
@@ -122,7 +123,7 @@ public class DStarLite implements java.io.Serializable {
 		return u;
 	}
 
-	/*
+	/**
 	 * Returns the rhs value for state u.
 	 */
 	private double getRHS(State u) {
@@ -135,7 +136,7 @@ public class DStarLite implements java.io.Serializable {
 		return cellHash.get(u).rhs;
 	}
 
-	/*
+	/**
 	 * Returns the g value for the state u.
 	 */
 	private double getG(State u) {
@@ -145,7 +146,7 @@ public class DStarLite implements java.io.Serializable {
 		return cellHash.get(u).g;
 	}
 
-	/*
+	/**
 	 * Pretty self explanatory, the heuristic we use is the 8-way distance
 	 * scaled by a constant C1 (should be set to <= min cost)
 	 */
@@ -153,14 +154,14 @@ public class DStarLite implements java.io.Serializable {
 		return eightCondist(a, b) * C1;
 	}
 
-	/*
+	/**
 	 * Returns the 8-way distance between state a and state b
 	 */
 	private double eightCondist(State a, State b) {
-		double temp;
 		double min = Math.abs(a.x - b.x);
 		double max = Math.abs(a.y - b.y);
 		if (min > max) {
+			double temp;
 			temp = min;
 			min = max;
 			max = temp;
@@ -178,14 +179,17 @@ public class DStarLite implements java.io.Serializable {
 			return false;
 		}
 
+		
 		LinkedList<State> n = new LinkedList<State>();
 		State cur = s_start;
 
+		// No path
 		if (getG(s_start) == Double.POSITIVE_INFINITY) {
 			System.out.println("No Path to Goal");
 			return false;
 		}
 
+		//Generate path
 		while (cur.neq(s_goal)) {
 			path.add(cur);
 			n = new LinkedList<State>();
@@ -225,7 +229,7 @@ public class DStarLite implements java.io.Serializable {
 		return true;
 	}
 
-	/*
+	/**
 	 * As per [S. Koenig,2002] except for two main modifications: 1. We stop
 	 * planning after a number of steps, 'maxsteps' we do this because this
 	 * algorithm can plan forever if the start is surrounded by obstacles 2. We
@@ -239,9 +243,10 @@ public class DStarLite implements java.io.Serializable {
 			return 1;
 
 		int k = 0;
+		boolean test = false;
 		while ((!openList.isEmpty())
 				&& (openList.peek().lt(s_start = calculateKey(s_start)))
-				|| (getRHS(s_start) != getG(s_start))) {
+				|| (test = (getRHS(s_start) != getG(s_start)))) {
 
 			if (k++ > maxSteps) {
 				System.out.println("At maxsteps");
@@ -251,7 +256,6 @@ public class DStarLite implements java.io.Serializable {
 
 			State u;
 
-			boolean test = (getRHS(s_start) != getG(s_start));
 
 			// lazy remove
 			while (true) {
@@ -265,7 +269,7 @@ public class DStarLite implements java.io.Serializable {
 					return 2;
 				break;
 			}
-
+//			System.out.println("Evaluating: "+u);
 			openHash.remove(u);
 
 			State k_old = new State(u);
@@ -305,22 +309,22 @@ public class DStarLite implements java.io.Serializable {
 
 		// Generate the successors, starting at the immediate right,
 		// Moving in a clockwise manner
-		tempState = new State(u.x + 1, u.y, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x, u.y + 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x, u.y - 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
-		tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0, -1.0));
-		s.addFirst(tempState);
+		tempState = new State(u.x + 1, u.y, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x + 1, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x - 1, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x - 1, u.y, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x - 1, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
+		tempState = new State(u.x + 1, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
+		s.add(tempState);
 
 		return s;
 	}
@@ -334,30 +338,30 @@ public class DStarLite implements java.io.Serializable {
 		LinkedList<State> s = new LinkedList<State>();
 		State tempState;
 
-		tempState = new State(u.x + 1, u.y, new Pair(-1.0, -1.0));
+		tempState = new State(u.x + 1, u.y, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x + 1, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x, u.y + 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x - 1, u.y + 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x - 1, u.y, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x - 1, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x, u.y - 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
-		tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0, -1.0));
+			s.add(tempState);
+		tempState = new State(u.x + 1, u.y - 1, new Pair<Double, Double>(-1.0, -1.0));
 		if (!occupied(tempState))
-			s.addFirst(tempState);
+			s.add(tempState);
 
 		return s;
 	}
@@ -390,7 +394,7 @@ public class DStarLite implements java.io.Serializable {
 
 		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
 			if (!close(entry.getValue().cost, C1)) {
-				tempPoint = new Pair(new ipoint2(entry.getKey().x,
+				tempPoint = new Pair<ipoint2, Double>(new ipoint2(entry.getKey().x,
 						entry.getKey().y), entry.getValue().cost);
 				toAdd.add(tempPoint);
 			}
@@ -454,7 +458,7 @@ public class DStarLite implements java.io.Serializable {
 			insert(u);
 	}
 
-	/*
+	/**
 	 * Returns true if state u is on the open list or not by checking if it is
 	 * in the hash table.
 	 */
@@ -463,10 +467,12 @@ public class DStarLite implements java.io.Serializable {
 			return false;
 		if (!close(keyHashCode(u), openHash.get(u)))
 			return false;
+		if (!inBounds(u))
+			return false;
 		return true;
 	}
 
-	/*
+	/**
 	 * Sets the G value for state u
 	 */
 	private void setG(State u, double g) {
@@ -474,7 +480,7 @@ public class DStarLite implements java.io.Serializable {
 		cellHash.get(u).g = g;
 	}
 
-	/*
+	/**
 	 * Sets the rhs value for state u
 	 */
 	private void setRHS(State u, double rhs) {
@@ -482,7 +488,7 @@ public class DStarLite implements java.io.Serializable {
 		cellHash.get(u).rhs = rhs;
 	}
 
-	/*
+	/**
 	 * Checks if a cell is in the hash table, if not it adds it in.
 	 */
 	private void makeNewCell(State u) {
@@ -494,7 +500,7 @@ public class DStarLite implements java.io.Serializable {
 		cellHash.put(u, tmp);
 	}
 
-	/*
+	/**
 	 * updateCell as per [S. Koenig, 2002]
 	 */
 	public void updateCell(int x, int y, double val) {
@@ -514,6 +520,9 @@ public class DStarLite implements java.io.Serializable {
 	 * Inserts state u into openList and openHash
 	 */
 	private void insert(State u) {
+//		if(!inBounds(u))
+//			return;
+//		System.out.println("Inserting state: "+u);
 		// iterator cur
 		float csum;
 
@@ -525,10 +534,15 @@ public class DStarLite implements java.io.Serializable {
 		// uncommented except it introduces a bug, I suspect that there is a
 		// bug somewhere else and having duplicates in the openList queue
 		// hides the problem...
-		// if ((cur != openHash.end()) && (close(csum,cur->second))) return;
+//		if (openHash.get(u) != null)
+//			return;
 
 		openHash.put(u, csum);
 		openList.add(u);
+	}
+
+	private boolean inBounds(State u) {
+		return !(u.x < 0 || u.y < 0 || u.x > 999 || u.y > 999); 
 	}
 
 	/*
@@ -536,7 +550,7 @@ public class DStarLite implements java.io.Serializable {
 	 * state that has been updated
 	 */
 	private float keyHashCode(State u) {
-		return (float) (u.k.first() + 1193 * u.k.second());
+		return (float) (u.k.first() + 119993 * u.k.second());
 	}
 
 	/*
@@ -550,7 +564,7 @@ public class DStarLite implements java.io.Serializable {
 		return (cellHash.get(u).cost < 0);
 	}
 
-	/*
+	/**
 	 * Euclidean cost between state a and state b
 	 */
 	private double trueDist(State a, State b) {
@@ -581,8 +595,8 @@ public class DStarLite implements java.io.Serializable {
 	 * Returns true if x and y are within 10E-5, false otherwise
 	 */
 	private boolean close(double x, double y) {
-		if (x == Double.POSITIVE_INFINITY && y == Double.POSITIVE_INFINITY)
-			return true;
+//		if (x == Double.POSITIVE_INFINITY && y == Double.POSITIVE_INFINITY)
+//			return true;
 		return (Math.abs(x - y) < 0.00001);
 	}
 
@@ -592,44 +606,50 @@ public class DStarLite implements java.io.Serializable {
 
 	public static void main(String[] args) {
 		DStarLite pf = new DStarLite();
-		pf.init(50,50, 503, 50);
-
-		// Setup boundaries
-		for (int i = 0; i < 1000; i++) {
-			pf.updateCell(i, 0, -1);
-			pf.updateCell(i, 1000, -1);
+		pf.init(50, 50, 503, 50);
+		
+		//add bounds
+		for (int i=0; i<1000; i++)
+		{
 			pf.updateCell(0, i, -1);
+			pf.updateCell(i, 0, -1);
 			pf.updateCell(1000, i, -1);
+			pf.updateCell(i, 1000, -1);
 		}
-
 		// add obstacles
-		// Fake wall
-		for (int i = 0; i < 100; i++) {
-			if (i != 69)
-				pf.updateCell(300, i, -1);
+		// Vertical obstacle
+		for (int i = 0; i < 400; i++) {
+			pf.updateCell(300, i, -1);
 		}
-
 		// pf.addRectObstcle(500, 500, 100, 200);
-
-		// Image
-		pf.bufImg = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
 
 		System.out.println("Start node: x: " + pf.s_start.x + ", y: "
 				+ pf.s_start.y);
 		System.out.println("End node:   x: " + pf.s_goal.x + ", y: "
 				+ pf.s_goal.y);
 
-		// Time the replanning
+		//Add a horizontal obstacle
+		for (int i = 50; i < 400; i++) {
+			pf.updateCell(i, 300, -1);
+		}
+		
+		// Time the first planning
 		long begin = System.currentTimeMillis();
 		pf.replan();
 		long end = System.currentTimeMillis();
 
-		System.out.println("Time: " + (end - begin) + "ms");
-
-		List<State> path = pf.getPath();
-		for (State i : path) {
-			System.out.println("x: " + i.x + " y: " + i.y + " | ");
-		}
+		System.out.println("Initial plan time: " + (end - begin) + "ms");
+/*
+		begin = System.currentTimeMillis();
+		pf.replan();
+		end = System.currentTimeMillis();
+		
+		System.out.println("replan time: " + (end - begin) + "ms");
+*/
+//		List<State> path = pf.getPath();
+//		for (State i : path) {
+//			System.out.println("x: " + i.x + " y: " + i.y + " | ");
+//		}
 		System.out.println();
 
 		pf.drawImage();
@@ -665,7 +685,7 @@ public class DStarLite implements java.io.Serializable {
 		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
 			State s = entry.getKey();
 			double cost = s.k.first();
-			if (cost > max)
+			if (cost > max && cost != Double.POSITIVE_INFINITY)
 				max = cost;
 		}
 		return max;
@@ -676,7 +696,7 @@ public class DStarLite implements java.io.Serializable {
 		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
 			State s = entry.getKey();
 			double cost = s.k.second();
-			if (cost > max)
+			if (cost > max && cost != Double.POSITIVE_INFINITY)
 				max = cost;
 		}
 		return max;
@@ -686,40 +706,64 @@ public class DStarLite implements java.io.Serializable {
 		double max = -100;
 		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
 			double cost = entry.getValue().cost;
-			if (cost > max)
+			if (cost > max && cost != Double.POSITIVE_INFINITY)
 				max = cost;
 		}
 		return max;
 	}
 
 	public void drawImage() {
+		// Image
+		bufImg = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
+
 		Graphics2D g2d = (Graphics2D) bufImg.getGraphics();
 		g2d.setBackground(Color.WHITE);
 
 		double max = maxRHSCost();
 		System.out.println("Max = " + max);
-		int count = 0;
-		// Display states on map??
+
+		System.out.println("Number of entries in cellhash: " + cellHash.size());
+		// Display costs in map??
 		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
 			State s = entry.getKey();
-//			double cost = entry.getValue().cost;
 			double cost = s.k.second();
-			if (cost < 0) {
-				g2d.setColor(Color.RED);
-				g2d.drawRect(s.x, s.y, 1, 1);
-			} else if (cost > 0) {
-				g2d.setColor(new Color(0, (int) (cost * 255 / max),
-						(int) (cost * 255 / max)));
-				g2d.drawRect(s.x, s.y, 1, 1);
+			if (cost > 0) {
+				if (cost != Double.POSITIVE_INFINITY) {
+					g2d.setColor(new Color(0, (int) (cost * 255 / max),
+							(int) (cost * 255 / max)));
+					g2d.drawLine(s.x, s.y, s.x, s.y);
+				}
 			}
 		}
 
-		System.out.println("start = "+s_start);
-		System.out.println("goal  = "+s_goal);
+		// Draw start and end
+		System.out.println("start = " + s_start);
+		System.out.println("goal  = " + s_goal);
 		g2d.setColor(Color.GREEN);
 		g2d.fillOval(s_start.x - 5, s_start.y - 5, 10, 10);
 		g2d.setColor(Color.GRAY);
 		g2d.fillOval(s_goal.x - 5, s_goal.y - 5, 10, 10);
+
+		// Draw path
+		g2d.setColor(Color.PINK);
+		List<State> path = getPath();
+		State last = null;
+		for (State s : path) {
+			if (last != null) {
+				g2d.drawLine(s.x, s.y, last.x, last.y);
+			}
+			last = s;
+		}
+
+		// Draw the obstacles
+		g2d.setColor(Color.RED);
+		for (Map.Entry<State, CellInfo> entry : cellHash.entrySet()) {
+			State s = entry.getKey();
+			double cost = entry.getValue().cost;
+			if (cost < 0) {
+				g2d.drawLine(s.x, s.y, s.x, s.y);
+			}
+		}
 
 		JFrame frame = new JFrame("Astar Boat Demo");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -728,25 +772,25 @@ public class DStarLite implements java.io.Serializable {
 		ImageIcon icon = new ImageIcon(bufImg);
 		JLabel label = new JLabel(icon);
 		frame.getContentPane().add(label);
-		frame.show();
+		frame.setVisible(true);
 	}
 }
 
+@SuppressWarnings("serial")
 class CellInfo implements java.io.Serializable {
 	/**
-	 * G and RHS are cost estimates to the goal from this cell
-	 * RHS is "better informed"
+	 * G and RHS are cost estimates to the goal from this cell RHS is
+	 * "better informed"
 	 */
 	public double g = 0;
-	
 	public double rhs = 0;
-	
+
 	/**
-	 *  cost is the cost of going onto the cell
-	 *  Higher costs will give less incentive to go to
-	 *  For instance, a rocky terrain might have cost 5, while pavement has cost 1
-	 *  
-	 *  cells with cost of -1 are unreachable (obstacles)
+	 * cost is the cost of going onto the cell Higher costs will give less
+	 * incentive to go to For instance, a rocky terrain might have cost 5, while
+	 * pavement has cost 1
+	 * 
+	 * cells with cost of -1 are unreachable (obstacles)
 	 */
 	public double cost = 0;
 }
